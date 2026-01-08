@@ -14,9 +14,7 @@ export default {
         }
       },
       fontFamily: {
-        // Usaremos 'serif' para títulos (Edensor/Playfair)
-        serif: ['"Playfair Display"', 'serif'], 
-        // Usaremos 'sans' para textos longos (Lato ou Inter)
+        serif: ['"Edensor"', '"Playfair Display"', 'serif'], // Agora usa Edensor como principal
         sans: ['"Inter"', 'sans-serif'],
       }
     },

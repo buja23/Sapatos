@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer utilities {
+  /* Esconde a barra no Chrome/Safari/Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Esconde a barra no Firefox/IE/Edge */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+@font-face {
+  font-family: 'Edensor';
+  src: url('./assets/fonts/Edensor-Free.woff2') format('woff2'), /* Ajuste o nome/caminho */
+       url('./assets/fonts/Edensor-Free.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
