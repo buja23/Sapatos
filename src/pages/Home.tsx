@@ -1,5 +1,6 @@
 import Hero from '../components/Hero';
 import FeaturedProducts from '../components/FeaturedProducts';
+import TrustBar from '../components/TrustBar';
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       
       {/* Capa Nova (Clean com Modelo) */}
       <Hero />
+      <TrustBar/>
       
       {/* Nova Vitrine de Produtos (Estilo Boutique) */}
       <FeaturedProducts />

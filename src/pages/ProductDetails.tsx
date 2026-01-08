@@ -8,11 +8,13 @@ export default function ProductDetails() {
   const { id } = useParams();
   const { products, addToCart } = useStore();
   
-  // Estado para a imagem selecionada
+  // Estado para a imagem selecionada na galeria
   const [selectedImage, setSelectedImage] = useState<string>('');
   
+  // Encontra o produto
   const product = products.find((p) => p.id === Number(id));
 
+  // Define a imagem inicial assim que o produto carregar
   useEffect(() => {
     if (product && product.images.length > 0) {
       setSelectedImage(product.images[0]);
@@ -33,34 +35,35 @@ export default function ProductDetails() {
     toast.success('Adicionado à sacola com sucesso! 👜');
   };
 
+  // Cálculo de parcelas (Simulação)
   const installmentValue = (product.priceSale / 12).toFixed(2).replace('.', ',');
 
   return (
     <div className="bg-white min-h-screen pb-20">
       
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 hidden lg:block">
+      {/* Breadcrumb / Navegação Topo */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Link to="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#0A1D56] transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar para a coleção
         </Link>
       </div>
 
-      <div className="max-w-7xl mx-auto lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
           
-          {/* --- COLUNA ESQUERDA: Galeria de Imagens --- */}
+          {/* COLUNA ESQUERDA: Galeria de Imagens */}
+          {/* gap-4 e flex-col-reverse no mobile para as miniaturas ficarem embaixo */}
           <div className="product-gallery flex flex-col-reverse lg:flex-row gap-4">
             
-            {/* 1. Lista de Miniaturas (Voltou!) */}
-            {/* Mobile: Horizontal embaixo | Desktop: Vertical na esquerda */}
-            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-24 lg:h-[600px] py-4 px-4 lg:py-0 lg:px-0 scrollbar-hide">
+            {/* Lista de Miniaturas (Thumbnails) */}
+            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-24 lg:h-[650px] py-2 lg:py-0 scrollbar-hide">
               {product.images.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(img)}
-                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImage === img ? 'border-[#0A1D56] ring-2 ring-[#0A1D56]/20' : 'border-transparent border-gray-100'
+                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border transition-all ${
+                    selectedImage === img ? 'border-[#0A1D56] ring-1 ring-[#0A1D56]' : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <img src={img} alt={`Vista ${index + 1}`} className="w-full h-full object-cover" />
@@ -68,47 +71,51 @@ export default function ProductDetails() {
               ))}
             </div>
 
-            {/* 2. Imagem Principal Grande */}
-            {/* AQUI ESTÁ O AJUSTE: h-[500px] no mobile (antes era aspect-ratio que ficava enorme) */}
-            <div className="flex-1 bg-gray-100 relative h-[500px] lg:h-[600px] lg:rounded-2xl overflow-hidden">
-              <img
-                src={selectedImage || product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover object-center"
-              />
+            {/* Imagem Principal Grande */}
+            <div className="flex-1 bg-gray-50 rounded-2xl overflow-hidden relative">
+                {/* AQUI ESTÁ O AJUSTE DE ALTURA:
+                   h-[400px] no mobile -> Para não ocupar a tela toda.
+                   lg:h-[650px] no PC -> Para ficar alto e elegante.
+                */}
+              <div className="h-[400px] sm:h-[500px] lg:h-[650px] w-full">
+                <img
+                  src={selectedImage || product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
               
-              {/* Botão Voltar (Mobile) */}
-              <Link to="/" className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm lg:hidden">
-                <ArrowLeft className="w-5 h-5 text-slate-700" />
-              </Link>
-
-              {/* Botão Favoritar */}
-              <button className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full shadow-sm hover:text-red-500 transition-colors group">
-                <Heart className="w-5 h-5 group-hover:fill-red-500 transition-all" />
+              {/* Botão de Favoritar Flutuante */}
+              <button className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full shadow-sm hover:text-red-500 transition-colors z-10">
+                <Heart className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* --- COLUNA DIREITA: Informações --- */}
-          <div className="px-4 pt-2 lg:pt-0 lg:px-0 mt-4 lg:mt-0 lg:sticky lg:top-24 h-fit">
+          {/* COLUNA DIREITA: Informações do Produto (Sticky) */}
+          <div className="mt-10 lg:mt-0 lg:sticky lg:top-8 h-fit">
             
-            {/* Cabeçalho */}
+            {/* Cabeçalho do Produto */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[#0A1D56] font-bold text-xs tracking-widest uppercase bg-blue-50 px-2 py-1 rounded">
                   Lançamento 2026
                 </span>
+                
+                {/* Avaliação */}
                 <div className="flex items-center gap-1">
                   <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
                   </div>
-                  <span className="text-xs text-gray-400 ml-1">(42)</span>
+                  <span className="text-xs text-gray-400 ml-1">(42 avaliações)</span>
                 </div>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-bold text-slate-900 font-['Playfair_Display'] leading-tight mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 font-['Playfair_Display'] leading-tight mb-2">
                 {product.name}
               </h1>
               <p className="text-gray-500 text-sm">Cód: {product.id}REF2026</p>
@@ -130,10 +137,11 @@ export default function ProductDetails() {
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
                 <CreditCard className="w-4 h-4 text-[#0A1D56]" />
                 <span>
-                  em até <strong className="text-slate-900">12x de R$ {installmentValue}</strong> sem juros
+                  em até <strong className="text-slate-900">10x de R$ {installmentValue}</strong> sem juros
                 </span>
               </div>
               
+              {/* Botão de Compra Principal */}
               <button
                 onClick={handleAddToCart}
                 className="w-full bg-[#0A1D56] text-white py-4 rounded-lg text-lg font-bold hover:bg-[#152C6F] transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
@@ -150,16 +158,17 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            {/* Descrição e Ícones */}
+            {/* Descrição e Detalhes */}
             <div className="space-y-6">
               <div>
                 <h3 className="font-bold text-slate-900 mb-2 font-['Playfair_Display'] text-lg">Sobre o Produto</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {product.description || 
-                    "Este modelo exclusivo combina design italiano com materiais de alta durabilidade. As lentes possuem proteção UV400 certificada. A armação em acetato premium oferece leveza e ajuste perfeito."}
+                    "Este modelo exclusivo combina design italiano com materiais de alta durabilidade. As lentes possuem proteção UV400 certificada, garantindo conforto visual e segurança. A armação em acetato premium oferece leveza e ajuste perfeito ao rosto."}
                 </p>
               </div>
 
+              {/* Ícones de Confiança (Gatilhos) */}
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-blue-50 rounded-full text-[#0A1D56]">
@@ -167,7 +176,7 @@ export default function ProductDetails() {
                   </div>
                   <div>
                     <h4 className="font-bold text-sm text-slate-900">Frete Grátis</h4>
-                    <p className="text-xs text-gray-500">Brasil todo</p>
+                    <p className="text-xs text-gray-500">Para todo Brasil</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -175,14 +184,15 @@ export default function ProductDetails() {
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-slate-900">Garantia</h4>
-                    <p className="text-xs text-gray-500">3 Meses</p>
+                    <h4 className="font-bold text-sm text-slate-900">Garantia Vision</h4>
+                    <p className="text-xs text-gray-500">3 Meses contra defeitos</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <button className="mt-8 flex items-center gap-2 text-sm text-gray-400 hover:text-[#0A1D56] transition-colors mx-auto lg:mx-0 w-full justify-center lg:justify-start">
+            {/* Botão Compartilhar */}
+            <button className="mt-8 flex items-center gap-2 text-sm text-gray-400 hover:text-[#0A1D56] transition-colors mx-auto lg:mx-0">
               <Share2 className="w-4 h-4" />
               Compartilhar este produto
             </button>

@@ -6,16 +6,14 @@ import {
   ReactNode,
   useMemo,
 } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from './AuthContext';
+// import { supabase } from '../lib/supabase'; // Removido
+// import { useAuth } from './AuthContext'; // Não é mais obrigatório para o carrinho
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { products as initialData } from '../data'; // Importando seus dados fictícios
 
-// 1. Defina o tipo Product para corresponder ao Front-end
-// Note que aqui mantemos os nomes que o Front já usa (camelCase)
 export interface Product {
   id: number;
-  created_at: string;
+  created_at?: string; // Opcional agora
   name: string;
   description: string;
   images: string[];
@@ -65,10 +63,10 @@ interface StoreProviderProps {
 }
 
 export function StoreProvider({ children }: StoreProviderProps) {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Desativado para demo livre
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCartLoading, setIsCartLoading] = useState(true);
+  const [isCartLoading, setIsCartLoading] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [filters, setFilters] = useState<FilterState>({
     searchText: '',
@@ -76,80 +74,28 @@ export function StoreProvider({ children }: StoreProviderProps) {
     sortBy: 'newest',
   });
 
-  // --- 1. FUNÇÃO DE BUSCA COM ADAPTER (A Mágica) ---
+  // --- 1. CARREGAMENTO DOS DADOS LOCAIS (MOCK) ---
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Erro ao buscar produtos:', error);
-        throw error;
-      }
-
-      if (data) {
-        // Aqui traduzimos do "Snake_Case do Banco" para "camelCase do React"
-        const transformedProducts: Product[] = data.map((dbProduct) => ({
-          id: dbProduct.id,
-          created_at: dbProduct.created_at,
-          name: dbProduct.name,
-          description: dbProduct.description || '',
-          images: dbProduct.images || [],
-          
-          // Adapter: Banco (stock_quantity) -> Front (stock)
-          stock: dbProduct.stock_quantity ?? dbProduct.stock ?? 0,
-          
-          // Adapter: Banco (price_sale) -> Front (priceSale)
-          priceSale: dbProduct.price_sale ?? dbProduct.price ?? 0,
-          
-          // Adapter: Banco (price_original) -> Front (priceOriginal)
-          priceOriginal: dbProduct.price_original ?? 0,
-        }));
-        setAllProducts(transformedProducts);
-      }
+      // Simula um delay de rede pequeno para parecer real
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Carrega do arquivo data.ts
+      setAllProducts(initialData);
+      
     } catch (error) {
-      console.error('Ocorreu um erro em fetchProducts:', error);
+      console.error('Erro mock:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- 2. HOOKS (Fora da função fetchProducts!) ---
-  
-  // Busca inicial
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Gerenciamento do Carrinho (Sessão do Usuário)
-  useEffect(() => {
-    const handleUserSessionCart = async () => {
-      if (user) {
-        setIsCartLoading(true);
-        const { data, error } = await supabase
-          .from('user_carts')
-          .select('product_id, quantity')
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error('Erro ao buscar carrinho do usuário:', error);
-        } else {
-          setCart(data.map(item => ({ productId: item.product_id, quantity: item.quantity })));
-        }
-        setIsCartLoading(false);
-      } else {
-        setCart([]);
-        setIsCartLoading(false);
-      }
-    };
-
-    handleUserSessionCart();
-  }, [user]);
-
-  // --- 3. FUNÇÕES AUXILIARES ---
+  // --- 2. AUXILIARES ---
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
     setFilters((prevFilters) => ({ ...prevFilters, ...newFilters }));
@@ -182,10 +128,7 @@ export function StoreProvider({ children }: StoreProviderProps) {
         break;
       case 'newest':
       default:
-        filtered.sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        // Se não tiver created_at, mantém a ordem original
         break;
     }
 
@@ -204,27 +147,11 @@ export function StoreProvider({ children }: StoreProviderProps) {
       .filter((item): item is CartProduct => item !== null);
   }, [cart, allProducts]);
 
+  // --- 3. AÇÕES DO CARRINHO (LOCAL) ---
+
   const addToCart = async (productId: number) => {
-    if (!user) {
-      toast(
-        (t) => (
-          <div className="flex items-center justify-between w-full">
-            <span className="mr-4 text-sm">
-              Você precisa estar logado para adicionar itens.
-            </span>
-            <Link
-              to="/login"
-              onClick={() => toast.dismiss(t.id)}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-lg text-sm whitespace-nowrap"
-            >
-              Fazer Login
-            </Link>
-          </div>
-        ),
-        { icon: '🔒' }
-      );
-      return;
-    }
+    // REMOVIDO CHECK DE LOGIN: Permite demo para convidado
+    // if (!user) { ... }
 
     const product = allProducts.find((p) => p.id === productId);
     if (!product) {
@@ -240,7 +167,7 @@ export function StoreProvider({ children }: StoreProviderProps) {
       return;
     }
 
-    // Atualização Otimista
+    // Atualização apenas no Estado Local
     setCart((currentCart) => {
       const existingItem = currentCart.find((item) => item.productId === productId);
       if (existingItem) {
@@ -250,68 +177,22 @@ export function StoreProvider({ children }: StoreProviderProps) {
       }
       return [...currentCart, { productId, quantity: 1 }];
     });
-
-    const { error } = await supabase.rpc('add_to_cart', {
-      p_product_id: productId,
-      p_quantity_change: 1,
-    });
-
-    if (error) {
-      console.error('Erro ao salvar no carrinho:', error);
-      const { data } = await supabase.from('user_carts').select('product_id, quantity').eq('user_id', user.id);
-      toast.error('Não foi possível adicionar ao carrinho.');
-      setCart(data?.map(item => ({ productId: item.product_id, quantity: item.quantity })) || []);
-    }
+    
+    // Feedback visual removido daqui pois geralmente o componente chama o toast,
+    // mas se o componente ProductCard não chamar, podemos descomentar abaixo:
+    // toast.success('Adicionado!');
   };
 
   const removeFromCart = async (productId: number) => {
-    if (!user) return;
-
     setCart((currentCart) => currentCart.filter((item) => item.productId !== productId));
-
-    const { error } = await supabase
-      .from('user_carts')
-      .delete()
-      .match({ user_id: user.id, product_id: productId });
-    
-    if (error) {
-      console.error('Erro ao remover do carrinho:', error);
-      const { data } = await supabase.from('user_carts').select('product_id, quantity').eq('user_id', user.id);
-      setCart(data?.map(item => ({ productId: item.product_id, quantity: item.quantity })) || []);
-    }
   };
 
   const clearCart = async () => {
-    if (!user) return;
-
     setCart([]);
-
-    const { error } = await supabase
-      .from('user_carts')
-      .delete()
-      .eq('user_id', user.id);
-    
-    if (error) {
-      console.error('Erro ao limpar carrinho:', error);
-      const { data } = await supabase.from('user_carts').select('product_id, quantity').eq('user_id', user.id);
-      setCart(data?.map(item => ({ productId: item.product_id, quantity: item.quantity })) || []);
-    }
   };
 
-  // --- 4. ATUALIZAÇÃO DE ESTOQUE (Corrigido para stock_quantity) ---
   const updateStock = async (productId: number, newStock: number) => {
     setAllProducts((prev) => prev.map((p) => (p.id === productId ? { ...p, stock: newStock } : p)));
-    
-    // Agora salvamos na coluna certa do banco: stock_quantity
-    const { error } = await supabase
-      .from('products')
-      .update({ stock_quantity: newStock })
-      .eq('id', productId);
-      
-    if (error) {
-      console.error('Erro ao atualizar o estoque:', error);
-      fetchProducts(); // Reverte em caso de erro
-    }
   };
 
   const priceBounds = useMemo(() => {
