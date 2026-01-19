@@ -1,44 +1,64 @@
-import { Truck, CreditCard, ShieldCheck, Phone } from 'lucide-react';
+import { Truck, CreditCard, ShieldCheck, MessageCircle } from 'lucide-react';
 
 export default function TrustBar() {
   const benefits = [
     {
-      icon: <Truck className="w-7 h-7" />,
-      title: "Enviamos para todo Brasil",
-      subtitle: "Via Correios PAC ou SEDEX"
+      icon: <Truck strokeWidth={1.5} className="w-6 h-6 lg:w-8 lg:h-8" />,
+      title: "Frete Grátis",
+      subtitle: "Acima de R$ 399"
     },
     {
-      icon: <CreditCard className="w-7 h-7" />,
-      title: "Parcele suas compras",
-      subtitle: "Até 10x sem juros ou Pix com 5% OFF"
+      icon: <CreditCard strokeWidth={1.5} className="w-6 h-6 lg:w-8 lg:h-8" />,
+      title: "10x Sem Juros",
+      subtitle: "Ou 5% OFF no PIX"
     },
     {
-      icon: <ShieldCheck className="w-7 h-7" />,
-      title: "Loja 100% Segura",
-      subtitle: "Seus dados sempre protegidos"
+      icon: <ShieldCheck strokeWidth={1.5} className="w-6 h-6 lg:w-8 lg:h-8" />,
+      title: "Compra Segura",
+      subtitle: "Dados protegidos"
     },
     {
-      icon: <Phone className="w-7 h-7" />,
-      title: "Dúvidas?",
-      subtitle: "Chame no WhatsApp agora"
+      icon: <MessageCircle strokeWidth={1.5} className="w-6 h-6 lg:w-8 lg:h-8" />,
+      title: "Suporte VIP",
+      subtitle: "Fale conosco"
     }
   ];
 
   return (
-    <div className="bg-[#FDFBF7] py-12 border-t border-[#DABC70]/20">
-      <div className="max-w-[1400px] mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="bg-[#FDFBF7] py-8 lg:py-10 border-t border-[#BC858E]/10 border-b border-[#BC858E]/10">
+      <div className="max-w-[1600px] mx-auto px-4 lg:px-12">
+        
+        {/* GRID RESPONSIVO:
+           - Mobile: grid-cols-2 (2 por linha, economiza altura)
+           - Desktop: grid-cols-4 (Tudo em uma linha)
+        */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-2 lg:gap-0">
+          
           {benefits.map((item, index) => (
-            <div key={index} className="flex items-center gap-4 px-4 hover:transform hover:translate-x-1 transition-transform duration-300">
-              <div className="w-14 h-14 rounded-full border border-slate-300 flex items-center justify-center text-[#997617] bg-white shadow-sm">
+            <div 
+              key={index} 
+              className={`
+                flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-5 px-2 group
+                ${index !== benefits.length - 1 ? 'lg:border-r lg:border-[#BC858E]/20' : ''} 
+              `}
+            >
+              {/* Ícone (Rose) - Centralizado no Mobile */}
+              <div className="text-[#BC858E] group-hover:scale-110 transition-transform duration-300 mb-1 lg:mb-0">
                 {item.icon}
               </div>
-              <div>
-                <h3 className="font-bold text-slate-700 uppercase text-xs tracking-wide">{item.title}</h3>
-                <p className="text-xs text-slate-400 mt-1">{item.subtitle}</p>
+              
+              {/* Textos - Centralizados no Mobile, Esquerda no Desktop */}
+              <div className="text-center lg:text-left">
+                <h3 className="font-['Playfair_Display'] font-bold text-slate-800 text-sm lg:text-lg leading-tight mb-1">
+                  {item.title}
+                </h3>
+                <p className="font-sans text-[10px] lg:text-xs text-slate-500 font-light tracking-wide uppercase">
+                  {item.subtitle}
+                </p>
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </div>

@@ -10,15 +10,14 @@ export default function NewArrivals() {
   // 1. DADOS: Pegamos os lançamentos (IDs > 4)
   const originalArrivals = products.slice(4);
 
-  // 2. INFINITO: Triplicamos a lista para garantir um loop suave e longo
-  // [Lista Original] + [Lista Clone 1] + [Lista Clone 2]
+  // 2. INFINITO: Triplicamos a lista
   const infiniteProducts = [...originalArrivals, ...originalArrivals, ...originalArrivals];
 
-  // Função de Scroll Manual (Setas)
+  // Função de Scroll Manual (Setas - Desktop)
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-      const scrollAmount = direction === 'left' ? -340 : 340; // Largura do card + gap
+      const scrollAmount = direction === 'left' ? -340 : 340;
       current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
@@ -28,47 +27,42 @@ export default function NewArrivals() {
     const container = scrollRef.current;
     if (!container) return;
 
-    // Se chegou muito perto do fim (faltando 100px), volta para o meio (começo do clone 2)
-    // Isso faz o usuário achar que a lista é infinita
     const maxScroll = container.scrollWidth - container.clientWidth;
     
+    // Teletransporte imperceptível
     if (container.scrollLeft >= maxScroll - 100) {
-      // Pula para o início do primeiro clone (sem animação, instantâneo)
-      // O valor exato depende da largura dos itens, mas 1/3 do total costuma funcionar bem
       container.scrollLeft = container.scrollWidth / 3; 
     }
     
-    // Se tentou voltar antes do começo (scroll < 0 no mobile), joga pro meio também
     if (container.scrollLeft <= 0) {
       container.scrollLeft = container.scrollWidth / 3; 
     }
   };
 
-  // Inicializa o scroll no meio para permitir rolar para os dois lados logo de cara
+  // Inicializa o scroll no meio
   useEffect(() => {
     if (scrollRef.current) {
-      // Centraliza no segundo set de produtos
       scrollRef.current.scrollLeft = scrollRef.current.scrollWidth / 3;
     }
   }, [products]);
 
   return (
-    <section className="bg-white py-20 border-t border-[#D2B572]/10 relative group/section">
+    <section className="bg-white py-12 lg:py-20 border-t border-[#D2B572]/10 relative group/section overflow-hidden">
       
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+      <div className="max-w-[1600px] mx-auto px-4 lg:px-12">
         
         {/* CABEÇALHO */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 lg:mb-12 gap-4 px-2 lg:px-0">
           <div>
-            <span className="text-[#997617] font-bold tracking-[0.2em] text-xs uppercase mb-2 block">
+            <span className="text-[#997617] font-bold tracking-[0.2em] text-[10px] lg:text-xs uppercase mb-2 block">
               Coleção Outono/Inverno
             </span>
-            <h2 className="text-3xl md:text-5xl font-['Playfair_Display'] text-slate-900">
-              Lançamentos <span className="italic font-['Pinyon_Script'] text-4xl md:text-6xl text-[#BC858E] ml-2">Exclusivos</span>
+            <h2 className="text-2xl md:text-5xl font-['Playfair_Display'] text-slate-900 leading-tight">
+              Lançamentos <span className="italic font-['Pinyon_Script'] text-3xl md:text-6xl text-[#BC858E] block md:inline lg:ml-2">Exclusivos</span>
             </h2>
           </div>
           
-          {/* SETAS */}
+          {/* SETAS (Apenas Desktop) */}
           <div className="hidden md:flex gap-3">
             <button 
               onClick={() => scroll('left')}
@@ -86,29 +80,41 @@ export default function NewArrivals() {
         </div>
 
         {/* CARROSSEL */}
-        <div className="relative -mx-6 lg:-mx-4 px-6 lg:px-4">
+        {/* Mobile: Margens negativas para encostar na borda da tela */}
+        <div className="relative -mx-4 lg:-mx-4"> 
           <div 
             ref={scrollRef}
             onScroll={handleScroll}
             className="
-              flex gap-8 overflow-x-auto pb-12 pt-4
-              scrollbar-hide snap-x snap-mandatory scroll-smooth
+              flex gap-4 lg:gap-8 
+              overflow-x-auto 
+              pb-8 pt-4 
+              px-4 lg:px-4
+              scrollbar-hide 
+              snap-x snap-mandatory 
+              scroll-smooth
             "
           >
             {infiniteProducts.map((product, index) => (
-              // Usamos index na key porque os IDs são repetidos (por causa do clone)
               <div 
                 key={`${product.id}-${index}`} 
-                className="min-w-[280px] sm:min-w-[320px] lg:min-w-[340px] snap-start"
+                // Mobile: w-[85vw] (mostra 85% do card, deixando uma beirada do próximo visível para incentivar scroll)
+                // Desktop: min-w-[340px] fixo
+                className="min-w-[75vw] sm:min-w-[320px] lg:min-w-[340px] snap-center lg:snap-start first:pl-2"
               >
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
 
-          {/* Gradiente Fade nas laterais (Opcional, dá acabamento pro) */}
-          <div className="absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-[#FDFBF7] to-transparent pointer-events-none hidden lg:block" />
-          <div className="absolute top-0 left-0 h-full w-32 bg-gradient-to-r from-[#FDFBF7] to-transparent pointer-events-none hidden lg:block" />
+          {/* Gradientes Laterais (Só Desktop) - No mobile atrapalha a visão */}
+          <div className="hidden lg:block absolute top-0 right-0 h-full w-32 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+          <div className="hidden lg:block absolute top-0 left-0 h-full w-32 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+        </div>
+
+        {/* Indicador de "Arraste" para Mobile (Opcional, mas ajuda na usabilidade) */}
+        <div className="lg:hidden flex justify-center text-[#D2B572]/50 text-[10px] uppercase tracking-widest mt-[-20px] animate-pulse">
+           &larr; Deslize para ver mais &rarr;
         </div>
 
       </div>
