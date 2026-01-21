@@ -4,6 +4,7 @@ import TrustBar from '../components/TrustBar';
 import NewArrivals from '../components/NewArrivals';
 import InstagramBar from '../components/InstagramBar';
 import CategoryCarousel from '../components/CategoryCarousel';
+import GoogleReviews from '../components/GoogleReviews';
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <CategoryCarousel />
       <FeaturedProducts />
       <NewArrivals />
+      <GoogleReviews />
       <InstagramBar/>
       
       </main>
