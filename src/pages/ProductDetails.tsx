@@ -1,20 +1,22 @@
 import { useParams, Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Truck, ShieldCheck, ArrowLeft, Star, Heart, Share2, CreditCard } from 'lucide-react';
+import { ShoppingBag, Truck, ShieldCheck, ArrowLeft, Star, Heart, Share2, CreditCard, ChevronDown, Ruler } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const { products, addToCart } = useStore();
   
-  // Estado para a imagem selecionada na galeria
+  // Estados
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(true);
   
   // Encontra o produto
   const product = products.find((p) => p.id === Number(id));
 
-  // Define a imagem inicial assim que o produto carregar
+  // Inicializa imagem
   useEffect(() => {
     if (product && product.images.length > 0) {
       setSelectedImage(product.images[0]);
@@ -23,183 +25,226 @@ export default function ProductDetails() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-slate-800">
-        <h2 className="text-2xl font-['Playfair_Display'] font-bold mb-4">Produto não encontrado</h2>
-        <Link to="/" className="text-[#0A1D56] underline hover:text-blue-800">Voltar para a loja</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFBF7] text-slate-800">
+        <h2 className="text-3xl font-serif font-bold mb-4 italic">Produto indisponível</h2>
+        <Link to="/" className="text-[#BC858E] underline hover:text-slate-900 tracking-widest uppercase text-xs">Voltar para a loja</Link>
       </div>
     );
   }
 
   const handleAddToCart = () => {
+    // Validação de Tamanho (Se o produto tiver grade de tamanhos)
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      toast.error('Por favor, selecione um tamanho.', {
+        style: { border: '1px solid #BC858E', color: '#713f12' },
+        iconTheme: { primary: '#BC858E', secondary: '#fff' },
+      });
+      return;
+    }
+
+    // Adiciona ao carrinho (com tamanho se houver)
+    // Nota: Se o seu addToCart suportar tamanho, passe-o aqui. 
+    // Por enquanto, usaremos a função padrão.
     addToCart(product.id);
-    toast.success('Adicionado à sacola com sucesso! 👜');
+    toast.success('Adicionado à sacola com sucesso!', {
+        style: { border: '1px solid #D2B572', color: '#000' },
+        iconTheme: { primary: '#D2B572', secondary: '#fff' },
+    });
   };
 
-  // Cálculo de parcelas (Simulação)
-  const installmentValue = (product.priceSale / 12).toFixed(2).replace('.', ',');
+  // Parcela (Simulação)
+  const installmentValue = (product.priceSale / 10).toFixed(2).replace('.', ',');
 
   return (
-    <div className="bg-white min-h-screen pb-20">
+    <div className="bg-white min-h-screen pb-20 font-sans">
       
-      {/* Breadcrumb / Navegação Topo */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Link to="/" className="inline-flex items-center text-sm text-gray-500 hover:text-[#0A1D56] transition-colors">
+      {/* Navegação Topo */}
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-6">
+        <Link to="/" className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-[#BC858E] transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar para a coleção
+          Voltar
         </Link>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-x-16 xl:gap-x-24">
           
-          {/* COLUNA ESQUERDA: Galeria de Imagens */}
-          {/* gap-4 e flex-col-reverse no mobile para as miniaturas ficarem embaixo */}
-          <div className="product-gallery flex flex-col-reverse lg:flex-row gap-4">
+          {/* ========================================================= */}
+          {/* COLUNA ESQUERDA: Galeria (Estilo Editorial) */}
+          {/* ========================================================= */}
+          <div className="flex flex-col-reverse lg:flex-row gap-4 mb-10 lg:mb-0">
             
-            {/* Lista de Miniaturas (Thumbnails) */}
-            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-24 lg:h-[650px] py-2 lg:py-0 scrollbar-hide">
+            {/* Thumbnails (Esquerda no Desktop, Baixo no Mobile) */}
+            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:w-24 lg:h-[700px] scrollbar-hide snap-x">
               {product.images.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(img)}
-                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border transition-all ${
-                    selectedImage === img ? 'border-[#0A1D56] ring-1 ring-[#0A1D56]' : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`
+                    relative flex-shrink-0 w-20 h-24 lg:w-24 lg:h-32 
+                    overflow-hidden border transition-all cursor-pointer snap-start
+                    ${selectedImage === img ? 'border-[#BC858E] opacity-100' : 'border-transparent opacity-70 hover:opacity-100'}
+                  `}
                 >
                   <img src={img} alt={`Vista ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
 
-            {/* Imagem Principal Grande */}
-            <div className="flex-1 bg-gray-50 rounded-2xl overflow-hidden relative">
-                {/* AQUI ESTÁ O AJUSTE DE ALTURA:
-                   h-[400px] no mobile -> Para não ocupar a tela toda.
-                   lg:h-[650px] no PC -> Para ficar alto e elegante.
-                */}
-              <div className="h-[400px] sm:h-[500px] lg:h-[650px] w-full">
+            {/* Imagem Principal */}
+            <div className="flex-1 relative group">
+              <div className="w-full h-[500px] lg:h-[750px] bg-slate-50 overflow-hidden">
                 <img
                   src={selectedImage || product.images[0]}
                   alt={product.name}
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
               
-              {/* Botão de Favoritar Flutuante */}
-              <button className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full shadow-sm hover:text-red-500 transition-colors z-10">
+              {/* Botão Favoritar */}
+              <button className="absolute top-4 right-4 p-3 bg-white/80 backdrop-blur rounded-full hover:bg-[#BC858E] hover:text-white transition-all shadow-sm">
                 <Heart className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* COLUNA DIREITA: Informações do Produto (Sticky) */}
-          <div className="mt-10 lg:mt-0 lg:sticky lg:top-8 h-fit">
+          {/* ========================================================= */}
+          {/* COLUNA DIREITA: Informações (Sticky) */}
+          {/* ========================================================= */}
+          <div className="lg:sticky lg:top-24 h-fit max-w-xl">
             
-            {/* Cabeçalho do Produto */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[#0A1D56] font-bold text-xs tracking-widest uppercase bg-blue-50 px-2 py-1 rounded">
-                  Lançamento 2026
+            {/* Cabeçalho */}
+            <div className="mb-8 border-b border-gray-100 pb-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[#BC858E] font-bold text-[10px] tracking-[0.2em] uppercase">
+                  Nova Coleção
                 </span>
-                
-                {/* Avaliação */}
-                <div className="flex items-center gap-1">
-                  <div className="flex text-amber-400">
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                    <Star className="w-4 h-4 fill-current" />
-                  </div>
-                  <span className="text-xs text-gray-400 ml-1">(42 avaliações)</span>
+                <div className="flex items-center gap-1 text-[#D2B572]">
+                  <Star className="w-3 h-3 fill-current" />
+                  <Star className="w-3 h-3 fill-current" />
+                  <Star className="w-3 h-3 fill-current" />
+                  <Star className="w-3 h-3 fill-current" />
+                  <Star className="w-3 h-3 fill-current" />
+                  <span className="text-xs text-slate-400 ml-1 font-medium text-black">(4.9)</span>
                 </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 font-['Playfair_Display'] leading-tight mb-2">
+              <h1 className="text-3xl lg:text-5xl font-serif text-slate-900 leading-none mb-4">
                 {product.name}
               </h1>
-              <p className="text-gray-500 text-sm">Cód: {product.id}REF2026</p>
-            </div>
-
-            {/* Preço e Parcelamento */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 mb-8">
-              <div className="flex items-end gap-3 mb-2">
-                <p className="text-4xl font-bold text-[#0A1D56]">
+              
+              <div className="flex items-end gap-3">
+                <p className="text-3xl font-light text-slate-900">
                   R$ {product.priceSale.toFixed(2).replace('.', ',')}
                 </p>
                 {product.priceOriginal > product.priceSale && (
-                  <p className="text-lg text-gray-400 line-through mb-1">
+                  <p className="text-sm text-slate-400 line-through mb-1.5">
                     R$ {product.priceOriginal.toFixed(2).replace('.', ',')}
                   </p>
                 )}
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                <CreditCard className="w-4 h-4 text-[#0A1D56]" />
-                <span>
-                  em até <strong className="text-slate-900">10x de R$ {installmentValue}</strong> sem juros
-                </span>
+              <div className="mt-2 text-xs text-slate-500 flex items-center gap-2">
+                <CreditCard className="w-3 h-3" />
+                <span>10x de <strong>R$ {installmentValue}</strong> sem juros</span>
               </div>
-              
-              {/* Botão de Compra Principal */}
+            </div>
+
+            {/* Seletor de Tamanhos (Se houver) */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-900">Tamanho</span>
+                  <button className="flex items-center gap-1 text-xs text-[#BC858E] underline decoration-[#BC858E]/50 hover:decoration-[#BC858E]">
+                    <Ruler className="w-3 h-3" /> Guia de Medidas
+                  </button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`
+                        w-12 h-12 flex items-center justify-center text-sm font-medium border transition-all
+                        ${selectedSize === size 
+                          ? 'bg-slate-900 text-white border-slate-900' 
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-900'}
+                      `}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Ações de Compra */}
+            <div className="space-y-4 mb-8">
               <button
                 onClick={handleAddToCart}
-                className="w-full bg-[#0A1D56] text-white py-4 rounded-lg text-lg font-bold hover:bg-[#152C6F] transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                className="w-full bg-slate-900 text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#BC858E] transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
               >
-                <ShoppingBag className="w-5 h-5" />
-                ADICIONAR À SACOLA
+                <ShoppingBag className="w-4 h-4" />
+                Adicionar à Sacola
               </button>
-
-              <div className="mt-4 text-center">
-                <p className="text-xs text-green-600 font-medium flex items-center justify-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  Estoque disponível - Envio Imediato
-                </p>
-              </div>
+              
+              <p className="text-[10px] text-green-700 font-medium flex items-center justify-center gap-2 bg-green-50 py-2 rounded">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                Disponível para envio imediato
+              </p>
             </div>
 
-            {/* Descrição e Detalhes */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-bold text-slate-900 mb-2 font-['Playfair_Display'] text-lg">Sobre o Produto</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {product.description || 
-                    "Este modelo exclusivo combina design italiano com materiais de alta durabilidade. As lentes possuem proteção UV400 certificada, garantindo conforto visual e segurança. A armação em acetato premium oferece leveza e ajuste perfeito ao rosto."}
-                </p>
+            {/* Acordeões (Informações) */}
+            <div className="border-t border-gray-100">
+              
+              {/* Descrição */}
+              <div className="border-b border-gray-100">
+                <button 
+                  onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
+                  className="w-full py-4 flex justify-between items-center text-left hover:text-[#BC858E] transition-colors"
+                >
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-900">Descrição</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isDescriptionOpen ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${isDescriptionOpen ? 'max-h-96 pb-4' : 'max-h-0'}`}>
+                  <p className="text-slate-600 text-sm leading-relaxed font-light">
+                    {product.description || "Confeccionado com materiais nobres, este produto une o design clássico à modernidade. Acabamento impecável, palmilha confort e solado resistente."}
+                  </p>
+                </div>
               </div>
 
-              {/* Ícones de Confiança (Gatilhos) */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-50 rounded-full text-[#0A1D56]">
-                    <Truck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900">Frete Grátis</h4>
-                    <p className="text-xs text-gray-500">Para todo Brasil</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-50 rounded-full text-[#0A1D56]">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900">Garantia Vision</h4>
-                    <p className="text-xs text-gray-500">3 Meses contra defeitos</p>
-                  </div>
-                </div>
+              {/* Detalhes de Envio */}
+              <div className="border-b border-gray-100">
+                <button className="w-full py-4 flex justify-between items-center text-left group">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E] transition-colors">Envio e Devoluções</span>
+                  <Truck className="w-4 h-4 text-slate-400" />
+                </button>
               </div>
+
+              {/* Segurança */}
+              <div className="border-b border-gray-100">
+                <button className="w-full py-4 flex justify-between items-center text-left group">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E] transition-colors">Compra Segura</span>
+                  <ShieldCheck className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
+
             </div>
-
-            {/* Botão Compartilhar */}
-            <button className="mt-8 flex items-center gap-2 text-sm text-gray-400 hover:text-[#0A1D56] transition-colors mx-auto lg:mx-0">
-              <Share2 className="w-4 h-4" />
-              Compartilhar este produto
-            </button>
-
           </div>
         </div>
       </div>
+      
+      {/* Botão Sticky Mobile (Aparece só no celular) */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 lg:hidden z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button
+            onClick={handleAddToCart}
+            className="w-full bg-slate-900 text-white py-3.5 text-xs font-bold uppercase tracking-widest hover:bg-[#BC858E] transition-colors"
+        >
+            Comprar • R$ {product.priceSale.toFixed(2).replace('.', ',')}
+        </button>
+      </div>
+
     </div>
   );
 }

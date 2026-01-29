@@ -1,3 +1,14 @@
+// 1. IMPORTAMOS AS IMAGENS DO TOPO
+import s1_1 from './assets/produtos/sapatos1-1.jpeg';
+import s1_2 from './assets/produtos/sapatos1-2.jpeg';
+
+import s2_1 from './assets/produtos/sapatos2-1.jpeg';
+import s2_2 from './assets/produtos/sapatos2-2.jpeg';
+
+import s3_1 from './assets/produtos/sapatos3-1.jpeg';
+import s3_2 from './assets/produtos/sapatos3-2.jpeg';
+
+// Definição do Tipo (para o TypeScript não reclamar)
 export interface Product {
   id: number;
   name: string;
@@ -6,6 +17,8 @@ export interface Product {
   priceSale: number;
   images: string[];
   stock: number;
+  category?: string; // Adicionei opcional para não quebrar filtros
+  sizes?: number[];  // Adicionei opcional
 }
 
 export const products: Product[] = [
@@ -17,11 +30,12 @@ export const products: Product[] = [
     priceOriginal: 499.90,
     priceSale: 359.90,
     images: [
-      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1596401057633-565652ca65af?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1515347619252-60a6bf4fffce?q=80&w=800&auto=format&fit=crop"
+      s1_1, // <--- Usamos a variável importada aqui
+      s1_2
     ],
-    stock: 12
+    stock: 12,
+    category: "sapatos",
+    sizes: [35, 36, 37, 38]
   },
   {
     id: 2,
@@ -30,11 +44,12 @@ export const products: Product[] = [
     priceOriginal: 589.00,
     priceSale: 429.00,
     images: [
-      "https://images.unsplash.com/photo-1562273138-f46be4ebdf33?q=80&w=800&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1618932260643-2b6795a23390?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1606764267425-603125e98585?q=80&w=800&auto=format&fit=crop"
+      s2_1, 
+      s2_2
     ],
-    stock: 8
+    stock: 8,
+    category: "sapatos",
+    sizes: [34, 35, 36, 37, 38]
   },
   {
     id: 3,
@@ -43,11 +58,12 @@ export const products: Product[] = [
     priceOriginal: 649.90,
     priceSale: 499.90,
     images: [
-      "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=800&auto=format&fit=crop", 
-      "https://images.unsplash.com/photo-1584735175315-9d58160926ad?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?q=80&w=800&auto=format&fit=crop"
+      s3_1, 
+      s3_2
     ],
-    stock: 15
+    stock: 15,
+    category: "botas",
+    sizes: [36, 37, 38, 39]
   },
   {
     id: 4,
