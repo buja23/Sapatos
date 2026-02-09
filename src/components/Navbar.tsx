@@ -20,19 +20,43 @@ export default function Header() {
     }
   }, [isMenuOpen, isSupportOpen]);
 
-  // Estrutura de Dados do Menu (Centralizada para facilitar manutenção)
+  // --- ESTRUTURA DE DADOS INTELIGENTE DO MENU ---
+  // Agora cada item tem seu "label" (nome visual) e "href" (link destino)
   const shoesSubmenu = [
     {
-      title: "Geral",
-      items: ["Chinelo", "Mocassim", "Mule", "Papete", "Rasteira", "Sapatilha", "Scarpin", "Tênis"]
+      title: "Sapatos", // Título em Negrito (Geral)
+      href: "/category/sapatos",
+      items: [
+        { label: "Scarpin", href: "/category/scarpin" },
+        { label: "Mocassim", href: "/category/mocassim" },
+        { label: "Sapatilha", href: "/category/sapatilha" },
+        { label: "Mule", href: "/category/mule" },
+        { label: "Papete", href: "/category/papete" },
+        { label: "Rasteira", href: "/category/rasteira" },
+        { label: "Tênis", href: "/category/tenis" },
+        { label: "Chinelo", href: "/category/chinelo" },
+      ]
     },
     {
-      title: "Sandálias",
-      items: ["Salto Fino", "Salto Grosso", "Meia Pata", "Flatform", "Anabela"]
+      title: "Sandálias", // Título em Negrito (Geral)
+      href: "/category/sandalias",
+      items: [
+        { label: "Salto Fino", href: "/category/sandalia-salto-fino" },
+        { label: "Salto Grosso", href: "/category/sandalia-salto-grosso" },
+        { label: "Meia Pata", href: "/category/sandalia-meia-pata" },
+        { label: "Flatform", href: "/category/sandalia-flatform" },
+        { label: "Anabela", href: "/category/sandalia-anabela" },
+      ]
     },
     {
-      title: "Botas",
-      items: ["Cano Alto", "Cano Curto", "Coturno", "Country"]
+      title: "Botas", // Título em Negrito (Geral)
+      href: "/category/botas",
+      items: [
+        { label: "Cano Alto", href: "/category/bota-cano-alto" },
+        { label: "Cano Curto", href: "/category/bota-cano-curto" },
+        { label: "Coturno", href: "/category/bota-coturno" },
+        { label: "Country", href: "/category/bota-country" },
+      ]
     }
   ];
 
@@ -41,14 +65,13 @@ export default function Header() {
       <header className="bg-[#D2B572] text-white shadow-md relative z-50 font-sans">
         
         {/* ======================================================== */}
-        {/* HEADER MOBILE (Barra Superior) */}
+        {/* HEADER MOBILE */}
         {/* ======================================================== */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 relative z-30 bg-[#D2B572]">
           <div className="flex items-center gap-3 w-1/4">
             <button 
               onClick={() => setIsMenuOpen(true)} 
               className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors active:scale-95"
-              aria-label="Abrir menu"
             >
               <Menu className="w-7 h-7" />
             </button>
@@ -84,7 +107,7 @@ export default function Header() {
             <div className="relative">
               <input 
                 type="text" 
-                placeholder="Olá, o que procura ?" 
+                placeholder="O que você está buscando?" 
                 className="w-full py-3 px-6 pr-12 rounded-sm bg-white text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#997617] shadow-sm text-sm tracking-wide"
               />
               <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -111,7 +134,7 @@ export default function Header() {
         </div>
 
         {/* ======================================================== */}
-        {/* NAV INFERIOR DESKTOP */}
+        {/* NAV INFERIOR DESKTOP (MEGA MENU) */}
         {/* ======================================================== */}
         <div className="hidden lg:block border-t border-white/20 relative z-40 bg-[#D2B572] mt-2">
           <div className="max-w-[1600px] mx-auto">
@@ -125,15 +148,31 @@ export default function Header() {
                     Sapatos
                     <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-180" />
                   </Link>
+                  
+                  {/* Dropdown Expandido */}
                   <div className="absolute left-0 top-full w-full bg-white text-slate-600 shadow-xl border-t border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top -translate-y-2 group-hover:translate-y-0 z-50">
                     <div className="max-w-[1000px] mx-auto py-10 px-12 grid grid-cols-3 gap-12 text-left">
                       {shoesSubmenu.map((section, idx) => (
                         <div key={idx} className="col-span-1">
-                          <h3 className="font-bold text-[#D2B572] uppercase tracking-widest text-xs mb-4 border-b border-gray-100 pb-2">{section.title}</h3>
+                          
+                          {/* Título da Coluna (Link Principal em Negrito) */}
+                          <Link 
+                            to={section.href} 
+                            className="block font-bold text-[#D2B572] uppercase tracking-widest text-xs mb-4 border-b border-gray-100 pb-2 hover:text-[#997617] transition-colors"
+                          >
+                            {section.title}
+                          </Link>
+
+                          {/* Lista de Sub-itens */}
                           <ul className="space-y-3">
                             {section.items.map((item) => (
-                              <li key={item}>
-                                <Link to={`/category/${item.toLowerCase().replace(' ', '-')}`} className="text-sm hover:text-[#BC858E] hover:translate-x-1 transition-all block">{item}</Link>
+                              <li key={item.label}>
+                                <Link 
+                                  to={item.href} 
+                                  className="text-sm text-slate-600 hover:text-[#BC858E] hover:translate-x-1 transition-all block font-normal"
+                                >
+                                  {item.label}
+                                </Link>
                               </li>
                             ))}
                           </ul>
@@ -156,17 +195,17 @@ export default function Header() {
         {/* MENU MOBILE (DRAWER SÊNIOR) */}
         {/* ======================================================== */}
         
-        {/* Backdrop Escuro */}
+        {/* Backdrop */}
         <div 
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 lg:hidden backdrop-blur-sm ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
           onClick={() => setIsMenuOpen(false)}
         />
 
-        {/* Painel Lateral */}
+        {/* Painel Lateral Mobile */}
         <div 
           className={`fixed top-0 left-0 h-[100dvh] w-[85%] max-w-[340px] bg-white z-50 transform transition-transform duration-300 ease-out lg:hidden shadow-2xl flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          {/* Topo do Menu */}
+          {/* Cabeçalho Mobile */}
           <div className="bg-[#D2B572] p-5 flex items-center justify-between text-white shrink-0 shadow-md z-10">
               <span className="font-serif text-xl italic font-bold tracking-wide">Menu</span>
               <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
@@ -174,27 +213,23 @@ export default function Header() {
               </button>
           </div>
           
-          {/* Conteúdo Rolável (Scroll) */}
+          {/* Conteúdo Mobile Rolável */}
           <div className="flex-1 overflow-y-auto bg-white scrollbar-thin scrollbar-thumb-gray-200">
               
-              {/* Barra de Busca Mobile */}
               <div className="p-5 pb-2">
                 <div className="relative">
-                    <input type="text" placeholder="Buscar produtos..." className="w-full bg-slate-50 text-slate-800 text-sm py-3 px-4 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#D2B572] focus:border-[#D2B572] transition-all"/>
+                    <input type="text" placeholder="Buscar produtos..." className="w-full bg-slate-50 text-slate-800 text-sm py-3 px-4 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#D2B572] transition-all"/>
                     <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
-              {/* Lista de Links */}
               <div className="py-2">
-                
-                {/* 1. Lançamentos */}
                 <Link to="/category/lancamentos" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-6 py-4 text-slate-800 hover:text-[#D2B572] border-b border-slate-50 text-sm font-bold uppercase tracking-wide transition-colors">
                     Lançamentos
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                 </Link>
 
-                {/* 2. Sapatos (Accordion Expansível) */}
+                {/* Sapatos Mobile (Accordion) */}
                 <div className="border-b border-slate-50">
                   <button 
                     onClick={() => setIsMobileShoesOpen(!isMobileShoesOpen)}
@@ -204,21 +239,30 @@ export default function Header() {
                     <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isMobileShoesOpen ? 'rotate-180 text-[#D2B572]' : ''}`} />
                   </button>
                   
-                  {/* Sub-itens de Sapatos */}
-                  <div className={`overflow-hidden transition-all duration-300 bg-slate-50/50 ${isMobileShoesOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  {/* Conteúdo Sapatos Mobile */}
+                  <div className={`overflow-hidden transition-all duration-300 bg-slate-50/50 ${isMobileShoesOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                      <div className="px-6 py-4 space-y-6">
                        {shoesSubmenu.map((section) => (
                           <div key={section.title}>
-                            <p className="text-[10px] font-bold text-[#D2B572] uppercase mb-2 tracking-widest border-b border-slate-200/50 pb-1 w-fit">{section.title}</p>
+                            {/* Título da Seção Mobile (Link Principal) */}
+                            <Link 
+                              to={section.href}
+                              onClick={() => setIsMenuOpen(false)}
+                              className="block text-[11px] font-bold text-[#D2B572] uppercase mb-3 tracking-widest border-b border-slate-200/50 pb-1 w-fit hover:text-[#997617]"
+                            >
+                              {section.title}
+                            </Link>
+                            
+                            {/* Sub-itens Mobile */}
                             <div className="grid grid-cols-2 gap-y-3 gap-x-2">
                               {section.items.map(item => (
                                 <Link 
-                                  key={item}
-                                  to={`/category/${item.toLowerCase().replace(' ', '-')}`}
+                                  key={item.label}
+                                  to={item.href}
                                   onClick={() => setIsMenuOpen(false)}
                                   className="text-[13px] text-slate-600 hover:text-[#BC858E] font-medium block leading-tight"
                                 >
-                                  {item}
+                                  {item.label}
                                 </Link>
                               ))}
                             </div>
@@ -231,25 +275,21 @@ export default function Header() {
                   </div>
                 </div>
 
-                {/* 3. Bolsas */}
                 <Link to="/category/bolsas" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-6 py-4 text-slate-800 hover:text-[#D2B572] border-b border-slate-50 text-sm font-bold uppercase tracking-wide transition-colors">
                     Bolsas
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                 </Link>
 
-                {/* 4. Acessórios */}
                 <Link to="/category/acessorios" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-6 py-4 text-slate-800 hover:text-[#D2B572] border-b border-slate-50 text-sm font-bold uppercase tracking-wide transition-colors">
                     Acessórios
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                 </Link>
 
-                {/* 5. Best Sellers */}
                 <Link to="/category/best-sellers" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-6 py-4 text-slate-800 hover:text-[#D2B572] border-b border-slate-50 text-sm font-bold uppercase tracking-wide transition-colors">
                     Best Sellers
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                 </Link>
 
-                {/* 6. Outlet */}
                 <Link to="/category/outlet" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between px-6 py-4 text-red-500 hover:text-red-600 border-b border-slate-50 text-sm font-bold uppercase tracking-wide transition-colors bg-red-50/10">
                     Outlet
                     <ChevronRight className="w-4 h-4 text-red-300" />
@@ -257,7 +297,6 @@ export default function Header() {
 
               </div>
 
-              {/* Área do Usuário (Rodapé do Menu) */}
               <div className="mt-6 px-6 pb-12 space-y-4">
                   <Link to="/account" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors">
                       <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#D2B572] shadow-sm">
@@ -281,7 +320,6 @@ export default function Header() {
 
       </header>
 
-      {/* Modal de Suporte */}
       <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
     </>
   );

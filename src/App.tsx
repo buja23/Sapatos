@@ -12,6 +12,7 @@ import ProtectedLayout from './components/ProtectedLayout';
 import SuccessPage from './pages/SuccessPage';
 import FailurePage from './pages/FailurePage';
 import AuthNotificationPage from './pages/AuthNotificationPage';
+import CategoryPage from './pages/CategoryPage'; // Importe a nova página
 import { Toaster } from 'react-hot-toast';
 
 // Componente para proteger rotas privadas
@@ -70,17 +71,21 @@ function App() {
         <Route path="/auth-notification" element={<AuthNotificationPage />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/failure" element={<FailurePage />} />
-        
+
         {/* Rotas que compartilham o layout principal (cabeçalho, rodapé, etc.) */}
         <Route element={<ProtectedLayout />}>
           {/* Rotas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          
+
+          {/* ROTA GENÉRICA PARA TODAS AS CATEGORIAS */}
+          {/* Isso pega: /category/sapatos, /category/scarpin, /category/bolsas... */}
+          <Route path="/category/:slug" element={<CategoryPage />} />
+
           {/* Rotas que exigem login */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/update-password" element={<ProtectedRoute><UpdatePassword /></ProtectedRoute>} />
-          
+
           {/* Rotas que exigem ser admin */}
           <Route path="/admin/inventory" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/sales" element={<AdminRoute><AdminSales /></AdminRoute>} />
