@@ -107,7 +107,7 @@ export default function Header() {
             <div className="relative">
               <input 
                 type="text" 
-                placeholder="O que você está buscando?" 
+                placeholder="Olá, o que procura ?" 
                 className="w-full py-3 px-6 pr-12 rounded-sm bg-white text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#997617] shadow-sm text-sm tracking-wide"
               />
               <Search className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
