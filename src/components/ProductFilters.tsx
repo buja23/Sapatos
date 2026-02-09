@@ -1,199 +1,166 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductFiltersProps {
-  categorySlug: string; // ex: "sapatos", "bolsas"
+  categorySlug: string;
   onFilterChange: (filters: any) => void;
   className?: string;
   closeMobile?: () => void;
 }
 
 export default function ProductFilters({ categorySlug, onFilterChange, className, closeMobile }: ProductFiltersProps) {
-  
-  // Lógica: Se não for bolsa/acessorio, é calçado (mostra tamanho)
-  const isFootwear = !['bolsas', 'acessorios', 'cintos', 'carteiras'].includes(categorySlug);
+  const isFootwear = !['bolsas', 'acessorios'].includes(categorySlug);
 
-  // Estados dos Filtros
-  const [priceRange, setPriceRange] = useState<number>(1000);
   const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedToeShapes, setSelectedToeShapes] = useState<string[]>([]);
 
-  // Estados dos Acordeões (Aberto/Fechado)
   const [openSections, setOpenSections] = useState({
-    price: true,
     size: true,
     color: true,
-    category: true
+    toe: true
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Envia filtros para o pai
   useEffect(() => {
     onFilterChange({
-      maxPrice: priceRange,
       sizes: selectedSizes,
       colors: selectedColors,
-      subcategories: selectedCategories
+      toeShapes: selectedToeShapes
     });
-  }, [priceRange, selectedSizes, selectedColors, selectedCategories]);
+  }, [selectedSizes, selectedColors, selectedToeShapes]);
 
-  // Opções (Isso poderia vir do banco de dados)
-  const sizes = [33, 34, 35, 36, 37, 38, 39, 40];
-  
-  const colors = [
-    { name: 'Preto', hex: '#000000', border: false },
-    { name: 'Branco', hex: '#FFFFFF', border: true },
-    { name: 'Nude', hex: '#E5D0B1', border: false },
-    { name: 'Dourado', hex: '#D4AF37', border: false },
-    { name: 'Prata', hex: '#C0C0C0', border: false },
-    { name: 'Vermelho', hex: '#EF4444', border: false },
-    { name: 'Caramelo', hex: '#B87333', border: false },
-    { name: 'Azul', hex: '#1D4ED8', border: false },
-  ];
-
-  const categoriesList = [
-    { id: 'scarpin', label: 'Scarpin' },
-    { id: 'sandalias', label: 'Sandálias' },
-    { id: 'tenis', label: 'Tênis' },
-    { id: 'botas', label: 'Botas' },
-    { id: 'mule', label: 'Mule' },
-  ];
-
-  // Funções de Toggle
-  const toggleSize = (size: number) => {
-    setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]);
+  const toggleFilter = (list: any[], setList: Function, value: any) => {
+    setList(list.includes(value) ? list.filter(item => item !== value) : [...list, value]);
   };
 
-  const toggleColor = (name: string) => {
-    setSelectedColors(prev => prev.includes(name) ? prev.filter(c => c !== name) : [...prev, name]);
-  };
+  const colorsList = ['Azul', 'Bege', 'Bronze', 'Caramelo', 'Dourado', 'Marrom', 'Metal', 'Nude', 'Off-White', 'Preto', 'Whisky'];
+  const toeShapes = ['Fino', 'Quadrado', 'Redondo'];
 
-  const toggleCategory = (id: string) => {
-    setSelectedCategories(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
+  const accordionVariants = {
+    open: { opacity: 1, height: "auto", transition: { duration: 0.3, ease: "circOut" } },
+    collapsed: { opacity: 0, height: 0, transition: { duration: 0.2, ease: "circIn" } }
   };
 
   return (
-    <div className={`bg-white h-full overflow-y-auto ${className} font-sans`}>
-      
-      {/* Header Mobile */}
-      <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-100">
-        <span className="font-bold text-lg font-serif italic text-slate-800">Filtros</span>
-        <button onClick={closeMobile} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-5 h-5" /></button>
+    <div className={`bg-white h-full overflow-y-auto ${className} font-sans pb-20 lg:pb-0 scrollbar-hide`}>
+      <div className="lg:hidden flex items-center justify-between p-6 border-b border-gray-100">
+        <span className="font-serif text-2xl italic text-slate-900">Filtros</span>
+        <button onClick={closeMobile} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
+          <X className="w-6 h-6 text-slate-400" />
+        </button>
       </div>
 
-      <div className="px-5 py-2">
-        
-        {/* 1. CATEGORIA (Subcategorias) */}
-        <div className="border-b border-gray-100 py-5">
-          <button onClick={() => toggleSection('category')} className="w-full flex justify-between items-center mb-2 group">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E]">Categoria</h3>
-            {openSections.category ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      <div className="px-6 py-2">
+        {/* SEÇÃO DE CORES */}
+        <div className="border-b border-gray-100 py-6">
+          <button onClick={() => toggleSection('color')} className="w-full flex justify-between items-center group text-left">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 group-hover:text-[#BC858E] transition-colors">Cor</h3>
+            <motion.div animate={{ rotate: openSections.color ? 180 : 0 }}>
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            </motion.div>
           </button>
           
-          {openSections.category && (
-            <div className="space-y-2 mt-3 animate-fade-in">
-              {categoriesList.map((cat) => (
-                <label key={cat.id} className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 border flex items-center justify-center transition-colors ${selectedCategories.includes(cat.id) ? 'bg-slate-900 border-slate-900' : 'border-gray-300 bg-white group-hover:border-[#BC858E]'}`}>
-                    {selectedCategories.includes(cat.id) && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <input type="checkbox" className="hidden" checked={selectedCategories.includes(cat.id)} onChange={() => toggleCategory(cat.id)} />
-                  <span className={`text-sm ${selectedCategories.includes(cat.id) ? 'font-bold text-slate-900' : 'text-slate-600 group-hover:text-[#BC858E]'}`}>
-                    {cat.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 2. PREÇO */}
-        <div className="border-b border-gray-100 py-5">
-          <button onClick={() => toggleSection('price')} className="w-full flex justify-between items-center mb-2 group">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E]">Preço</h3>
-            {openSections.price ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-
-          {openSections.price && (
-            <div className="mt-4 animate-fade-in">
-              <input 
-                type="range" min="0" max="1000" step="50" value={priceRange}
-                onChange={(e) => setPriceRange(Number(e.target.value))}
-                className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
-              />
-              <div className="flex justify-between mt-2 text-xs text-slate-500 font-medium">
-                <span>R$ 0</span>
-                <span>R$ {priceRange}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 3. TAMANHO (Só para Calçados) */}
-        {isFootwear && (
-          <div className="border-b border-gray-100 py-5">
-            <button onClick={() => toggleSection('size')} className="w-full flex justify-between items-center mb-2 group">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E]">Tamanho</h3>
-              {openSections.size ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-            </button>
-
-            {openSections.size && (
-              <div className="grid grid-cols-4 gap-2 mt-3 animate-fade-in">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => toggleSize(size)}
-                    className={`
-                      h-9 flex items-center justify-center text-xs font-medium border transition-all
-                      ${selectedSizes.includes(size) 
-                        ? 'bg-slate-900 text-white border-slate-900' 
-                        : 'bg-white text-slate-600 border-gray-200 hover:border-slate-900'}
-                    `}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
+          <AnimatePresence initial={false}>
+            {openSections.color && (
+              <motion.div 
+                variants={accordionVariants}
+                initial="collapsed" animate="open" exit="collapsed"
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-5">
+                  {colorsList.map((color, index) => (
+                    <motion.label 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      key={color} 
+                      className="flex items-center gap-3 py-1 cursor-pointer group/item"
+                    >
+                      <div className="relative flex items-center justify-center">
+                        <input type="checkbox" className="peer sr-only" checked={selectedColors.includes(color)} onChange={() => toggleFilter(selectedColors, setSelectedColors, color)} />
+                        <div className={`w-4 h-4 border transition-all duration-300 ${selectedColors.includes(color) ? 'bg-slate-900 border-slate-900' : 'border-gray-200 group-hover/item:border-[#BC858E]'}`} />
+                        {selectedColors.includes(color) && (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute w-1.5 h-1.5 bg-white rounded-full" />
+                        )}
+                      </div>
+                      <span className={`text-[13px] transition-colors ${selectedColors.includes(color) ? 'text-slate-900 font-medium' : 'text-slate-500 group-hover/item:text-[#BC858E]'}`}>
+                        {color}
+                      </span>
+                    </motion.label>
+                  ))}
+                </div>
+              </motion.div>
             )}
+          </AnimatePresence>
+        </div>
+
+        {/* SEÇÃO DE TAMANHO */}
+        {isFootwear && (
+          <div className="border-b border-gray-100 py-6">
+            <button onClick={() => toggleSection('size')} className="w-full flex justify-between items-center group text-left">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 group-hover:text-[#BC858E]">Tamanho</h3>
+              <motion.div animate={{ rotate: openSections.size ? 180 : 0 }}>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </motion.div>
+            </button>
+            <AnimatePresence initial={false}>
+              {openSections.size && (
+                <motion.div variants={accordionVariants} initial="collapsed" animate="open" exit="collapsed" className="overflow-hidden">
+                  <div className="grid grid-cols-4 gap-2 mt-5">
+                    {[34, 35, 36, 37, 38, 39, 40].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => toggleFilter(selectedSizes, setSelectedSizes, size)}
+                        className={`h-10 text-[13px] border transition-all duration-300 ${selectedSizes.includes(size) ? 'bg-slate-900 border-slate-900 text-white' : 'border-gray-100 text-slate-500 hover:border-[#BC858E] hover:text-[#BC858E]'}`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
-        {/* 4. CORES */}
-        <div className="py-5">
-          <button onClick={() => toggleSection('color')} className="w-full flex justify-between items-center mb-2 group">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900 group-hover:text-[#BC858E]">Cor</h3>
-            {openSections.color ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-
-          {openSections.color && (
-            <div className="flex flex-wrap gap-3 mt-3 animate-fade-in">
-              {colors.map((color) => {
-                const isSelected = selectedColors.includes(color.name);
-                return (
-                  <button
-                    key={color.name}
-                    onClick={() => toggleColor(color.name)}
-                    className={`
-                      w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 relative
-                      ${isSelected ? 'ring-1 ring-offset-2 ring-slate-900' : ''}
-                      ${color.border ? 'border border-gray-200' : ''}
-                    `}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  >
-                    {isSelected && color.name === 'Branco' && <Check className="w-3 h-3 text-black" />}
-                    {isSelected && color.name !== 'Branco' && <Check className="w-3 h-3 text-white" />}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
+        {/* SEÇÃO DE BICO */}
+        {isFootwear && (
+          <div className="py-6">
+            <button onClick={() => toggleSection('toe')} className="w-full flex justify-between items-center group text-left">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 group-hover:text-[#BC858E]">Bico</h3>
+              <motion.div animate={{ rotate: openSections.toe ? 180 : 0 }}>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </motion.div>
+            </button>
+            <AnimatePresence initial={false}>
+              {openSections.toe && (
+                <motion.div variants={accordionVariants} initial="collapsed" animate="open" exit="collapsed" className="overflow-hidden">
+                  <div className="flex flex-col gap-3 mt-5">
+                    {toeShapes.map((shape) => (
+                      <button
+                        key={shape}
+                        onClick={() => toggleFilter(selectedToeShapes, setSelectedToeShapes, shape)}
+                        className="group/toe flex items-center justify-between w-full text-left"
+                      >
+                        <span className={`text-[13px] transition-all ${selectedToeShapes.includes(shape) ? 'text-slate-900 font-bold translate-x-1' : 'text-slate-500 group-hover/toe:text-[#BC858E]'}`}>
+                          {shape}
+                        </span>
+                        {selectedToeShapes.includes(shape) && (
+                          <motion.div layoutId="active-dot" className="w-1 h-1 bg-slate-900 rounded-full" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );
